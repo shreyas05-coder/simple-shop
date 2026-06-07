@@ -69,6 +69,10 @@ function writeOrders(orders) {
   fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2), 'utf8')
 }
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Simple Shop backend is running' })
+})
+
 app.get('/products', (req, res) => {
   const search = (req.query.search || '').toLowerCase()
   const category = (req.query.category || '').toLowerCase()
