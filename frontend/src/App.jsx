@@ -139,25 +139,55 @@ export default function App() {
 
   return (
     <div className="container">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Modern store</p>
-          <h1>Shop fast. Sell easy.</h1>
-          <p className="hero-copy">
-            Search products, add them to cart, and checkout with a secure payment flow.
-          </p>
+      <div className="top-bar">
+        Complimentary fabric swatches on orders above ₹ 5,000 · Worldwide shipping
+      </div>
+
+      <header className="site-header">
+        <nav className="nav-links">
+          <a href="#fabrics">Fabrics</a>
+          <a href="#colors">Colors</a>
+          <a href="#apparel">Apparel</a>
+          <a href="#heritage">Heritage</a>
+        </nav>
+
+        <div className="brand-logo">
+          <span>Ivory</span>
+          <span>·</span>
+          <span>Thread</span>
         </div>
-        <div className="hero-summary">
-          <span>{cartCount} items</span>
-          <strong>${(cartTotal / 100).toFixed(2)}</strong>
-        </div>
+
+        <nav className="nav-actions">
+          <button type="button" className="nav-button">Search</button>
+          <button type="button" className="nav-button">Account</button>
+          <button type="button" className="nav-button">Bag ({cartCount})</button>
+        </nav>
       </header>
+
+      <section className="hero">
+        <div className="hero-copy-block">
+          <p className="hero-eyebrow">Crafting excellence</p>
+          <h1>
+            Crafting excellence
+            <br />
+            <span>through every thread.</span>
+          </h1>
+          <p className="hero-copy-text">
+            Thirty years of textile manufacturing. Premium fabrics and luxury fashion, delivered to ateliers,
+            designers, and discerning homes worldwide.
+          </p>
+          <div className="hero-buttons">
+            <button type="button" className="primary-button">Shop fabrics</button>
+            <button type="button" className="secondary-button">Explore collections</button>
+          </div>
+        </div>
+      </section>
 
       <div className="search-bar">
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search products"
+          placeholder="Search the Ivory Thread collection"
         />
         <select value={category} onChange={(event) => setCategory(event.target.value)}>
           {categories.map((value) => (
@@ -172,8 +202,8 @@ export default function App() {
         <section className="catalog">
           <div className="section-header">
             <div>
-              <h2>Products</h2>
-              <p>Filter by category or search to find exactly what you need.</p>
+              <h2>Signature pieces</h2>
+              <p>Handpicked products designed to feel luxurious and calm.</p>
             </div>
             <span className="badge">{filteredProducts.length} items</span>
           </div>
@@ -201,14 +231,14 @@ export default function App() {
           <div className="section-header">
             <div>
               <h2>Cart</h2>
-              <p>{cart.length ? 'Your order is ready to checkout.' : 'Add products to your cart.'}</p>
+              <p>{cart.length ? 'Ready for checkout.' : 'Your cart is empty.'}</p>
             </div>
             <span className="badge cart-badge">{cartCount}</span>
           </div>
 
           <div className="cart-list">
             {cart.length === 0 ? (
-              <div className="empty-state">Your cart is empty.</div>
+              <div className="empty-state">Collect your favorite pieces and complete your space.</div>
             ) : (
               cart.map((item) => (
                 <div key={item.id} className="cart-item">
@@ -273,7 +303,7 @@ export default function App() {
           )}
 
           <div className="history-panel">
-            <h3>Order history</h3>
+            <h3>Purchase history</h3>
             <div className="history-search">
               <input
                 value={orderEmail}

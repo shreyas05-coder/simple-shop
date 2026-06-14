@@ -12,46 +12,46 @@ const ordersFile = path.join(__dirname, 'orders.json')
 const products = [
   {
     id: 1,
-    name: 'Premium T-Shirt',
-    description: 'Soft cotton tee with a modern, flattering fit.',
-    price: 2399,
-    category: 'Apparel',
+    name: 'Ivory Linen Throw',
+    description: 'A luxurious, handwoven throw with airy texture and soft drape.',
+    price: 4299,
+    category: 'Home',
     image:
       'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 2,
-    name: 'Coffee Mug',
-    description: 'Stoneware mug designed for your daily brew.',
-    price: 1599,
-    category: 'Home',
+    name: 'Signature Ceramic Vase',
+    description: 'An elegant neutral vase finished in matte glaze for modern interiors.',
+    price: 3399,
+    category: 'Decor',
     image:
       'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 3,
-    name: 'Sticker Pack',
-    description: 'Fun vinyl stickers for laptops, water bottles, and more.',
-    price: 799,
-    category: 'Accessories',
+    name: 'Ivory Thread Candle',
+    description: 'Soft floral candle with a warm, creamy scent and simple glass vessel.',
+    price: 2399,
+    category: 'Fragrance',
     image:
       'https://images.unsplash.com/photo-1520880867055-1e30d1cb001c?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 4,
-    name: 'Notepad Set',
-    description: 'Premium paper notebooks for notes and sketches.',
-    price: 1899,
-    category: 'Office',
+    name: 'Textured Journal',
+    description: 'Fine paper journal wrapped in neutral linen cover for thoughtful notes.',
+    price: 2799,
+    category: 'Stationery',
     image:
       'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80'
   },
   {
     id: 5,
-    name: 'Wireless Headphones',
-    description: 'Noise-isolating headphones for music and calls.',
-    price: 4999,
-    category: 'Electronics',
+    name: 'Portrait Throw Pillow',
+    description: 'A soft pillow in muted ivory tones with a subtle woven pattern.',
+    price: 3199,
+    category: 'Home',
     image:
       'https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=600&q=80'
   }

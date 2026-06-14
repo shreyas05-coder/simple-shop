@@ -27,9 +27,28 @@ git remote add origin https://github.com/YOUR_USERNAME/simple-shop.git
 git push -u origin main
 ```
 
-## 2. Deploy the backend to Railway
+## 2. Deploy the backend to Render (recommended)
 
-Railway is a simple free host for Node/Express.
+Render can deploy this monorepo backend quickly using `render.yaml`.
+
+1. Go to https://render.com and sign in with GitHub.
+2. Create a new Web Service.
+3. Connect your `YOUR_USERNAME/simple-shop` repo.
+4. Render will detect `render.yaml` in the repo and deploy the backend service from the `backend` folder.
+5. When deployment completes, copy the generated backend URL.
+
+### If Render asks for service settings manually
+- Environment: `Node`
+- Build Command: `npm install`
+- Start Command: `npm start`
+- Root Directory: `backend`
+
+### Important
+- The backend listens on `process.env.PORT`, so Render will set the correct port automatically.
+- `render.yaml` is included in this repo to simplify deployment.
+
+### Alternative: Railway
+If you still prefer Railway, use the steps below:
 
 1. Go to https://railway.app and sign in with GitHub.
 2. Create a new project and choose "Deploy from GitHub".

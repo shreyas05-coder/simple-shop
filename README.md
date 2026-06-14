@@ -30,6 +30,8 @@ node index.js
 
 Then run the frontend with `VITE_API_URL=http://localhost:4001` if needed.
 
+The repo now includes `render.yaml`, so you can deploy the backend on Render easily from the root repository.
+
 Deployment suggestions:
 - Host frontend on Netlify or Vercel (build output from `frontend/dist`).
 - Host backend on Railway, Render, or Fly; set the `VITE_API_URL` for the frontend to the deployed backend URL.
