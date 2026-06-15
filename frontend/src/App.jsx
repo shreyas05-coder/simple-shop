@@ -127,24 +127,38 @@ export default function App() {
 
   function addToCart(product) {
     const productId = product._id || product.id
+    const stock = Number(product.stock) || 0
+    if (stock <= 0) {
+      setStatus(`${product.name} is currently out of stock.`)
+      return
+    }
     setCart((previous) => {
       const existing = previous.find((item) => item.id === productId)
       if (existing) {
+        if (existing.qty >= stock) {
+          setStatus(`Only ${stock} unit(s) of ${product.name} are available.`)
+          return previous
+        }
         return previous.map((item) =>
           item.id === productId ? { ...item, qty: item.qty + 1 } : item
         )
       }
-      return [...previous, { ...product, id: productId, qty: 1 }]
+      setStatus(`${product.name} added to cart.`)
+      return [...previous, { ...product, id: productId, stock, qty: 1 }]
     })
   }
 
   function updateQty(id, delta) {
     setCart((previous) =>
-      previous
-        .map((item) =>
-          item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item
-        )
-        .filter((item) => item.qty > 0)
+      previous.map((item) => {
+        if (item.id !== id) return item
+        const stock = Number(item.stock) || 0
+        const nextQty = Math.max(1, Math.min(stock, item.qty + delta))
+        if (delta > 0 && item.qty >= stock) {
+          setStatus(`Only ${stock} unit(s) of ${item.name} are available.`)
+        }
+        return { ...item, qty: nextQty }
+      })
     )
   }
 
@@ -212,6 +226,10 @@ export default function App() {
 
   async function submitOrder(event) {
     event.preventDefault()
+    if (qrPaymentUrl) {
+      setStatus('QR payment is already created for this order. Scan it or refresh checkout to start again.')
+      return
+    }
     if (!customer.name || !customer.email || !customer.phone || !customer.street || !customer.city || !customer.state || !customer.zip) {
       setStatus('Please complete your contact and shipping details.')
       return
@@ -245,6 +263,9 @@ export default function App() {
         body: JSON.stringify({ items, total: cartTotal, customer, paymentMethod, shippingAddress })
       })
       const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Checkout failed')
+      }
       // If QR flow, backend returns a paymentUrl we should display
       if (paymentMethod === 'qr' && data.paymentUrl) {
         setQrPaymentUrl(data.paymentUrl)
@@ -258,9 +279,10 @@ export default function App() {
       setCheckoutMode(false)
       setQrPaymentUrl(null)
       setCurrentOrderId(null)
+      await fetchProducts()
       setStatus(`Order confirmed! Order #${data.orderId} has been received.`)
     } catch (error) {
-      setStatus('Checkout failed. Please try again.')
+      setStatus(error.message || 'Checkout failed. Please try again.')
     }
   }
 
@@ -443,7 +465,12 @@ export default function App() {
                   </div>
                   <div className="product-meta">
                     <span className="price">{formatMoney(product.price)}</span>
-                    <button onClick={() => addToCart(product)}>Add to cart</button>
+                    <span className={`stock-note ${product.stock > 0 ? '' : 'sold-out'}`}>
+                      {product.stock > 0 ? `${product.stock} in stock` : 'Sold out'}
+                    </span>
+                    <button onClick={() => addToCart(product)} disabled={product.stock <= 0}>
+                      {product.stock > 0 ? 'Add to cart' : 'Sold out'}
+                    </button>
                   </div>
                 </div>
               </article>
@@ -474,8 +501,9 @@ export default function App() {
                     <div className="qty-controls">
                       <button onClick={() => updateQty(item.id, -1)}>-</button>
                       <span>{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, 1)}>+</button>
+                      <button onClick={() => updateQty(item.id, 1)} disabled={item.qty >= item.stock}>+</button>
                     </div>
+                    <small className="stock-note">{item.stock} available</small>
                     <button className="text-button" onClick={() => removeFromCart(item.id)}>
                       Remove
                     </button>
@@ -585,6 +613,7 @@ export default function App() {
                           setCheckoutMode(false)
                           setQrPaymentUrl(null)
                           setCurrentOrderId(null)
+                          await fetchProducts()
                           setStatus(`Payment received. Order #${json.orderId} confirmed.`)
                         } else {
                           setStatus('Could not confirm payment.')
@@ -642,7 +671,9 @@ export default function App() {
                     <p>{productDetail.description}</p>
                     <div className="detail-actions">
                       <strong className="price">{formatMoney(productDetail.price)}</strong>
-                      <button onClick={() => { addToCart(productDetail); setProductDetail(null) }}>Add to cart</button>
+                      <button disabled={productDetail.stock <= 0} onClick={() => { addToCart(productDetail); setProductDetail(null) }}>
+                        {productDetail.stock > 0 ? `Add to cart (${productDetail.stock} left)` : 'Sold out'}
+                      </button>
                     </div>
                   </div>
                 </div>

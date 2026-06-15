@@ -273,14 +273,57 @@ app.post('/orders', async (req, res) => {
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Items required' })
   }
+  if (!customer?.name || !customer?.email || !customer?.phone || !shippingAddress?.street || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zip) {
+    return res.status(400).json({ error: 'Complete customer and shipping details are required' })
+  }
   try {
     const orderId = 'ORD-' + Date.now()
     let paymentIntentId = null
+    const normalizedItems = []
+    let calculatedTotal = 0
+
+    if (mongoose.connection.readyState === 1) {
+      for (const item of items) {
+        const qty = Number(item.qty)
+        if (!item.id || !Number.isInteger(qty) || qty < 1) {
+          return res.status(400).json({ error: 'Invalid cart item quantity' })
+        }
+
+        const product = await Product.findById(item.id)
+        if (!product) {
+          return res.status(404).json({ error: `${item.name || 'Product'} is no longer available` })
+        }
+        if (product.stock < qty) {
+          return res.status(400).json({ error: `Only ${product.stock} unit(s) of ${product.name} are available` })
+        }
+
+        normalizedItems.push({
+          id: product._id.toString(),
+          name: product.name,
+          price: product.price,
+          qty
+        })
+        calculatedTotal += product.price * qty
+      }
+    } else {
+      for (const item of items) {
+        const qty = Number(item.qty)
+        const product = initialProducts.find((p) => p._id === item.id)
+        if (!product || !Number.isInteger(qty) || qty < 1) {
+          return res.status(400).json({ error: 'Invalid cart item' })
+        }
+        if (product.stock < qty) {
+          return res.status(400).json({ error: `Only ${product.stock} unit(s) of ${product.name} are available` })
+        }
+        normalizedItems.push({ id: product._id, name: product.name, price: product.price, qty })
+        calculatedTotal += product.price * qty
+      }
+    }
 
     // Handle Stripe payment
     if (paymentMethod === 'stripe' && global.stripe) {
       const paymentIntent = await global.stripe.paymentIntents.create({
-        amount: total,
+        amount: calculatedTotal,
         currency: 'inr',
         metadata: { orderId, email: customer.email }
       })
@@ -290,8 +333,8 @@ app.post('/orders', async (req, res) => {
     const order = new Order({
       orderId,
       userId: req.user?.id || null,
-      items,
-      total,
+      items: normalizedItems,
+      total: calculatedTotal,
       customer,
       paymentMethod,
       paymentStatus: paymentMethod === 'qr' || paymentMethod === 'stripe' ? 'pending' : 'completed',
@@ -300,8 +343,14 @@ app.post('/orders', async (req, res) => {
     })
     await order.save()
 
+    if (mongoose.connection.readyState === 1) {
+      for (const item of normalizedItems) {
+        await Product.findByIdAndUpdate(item.id, { $inc: { stock: -item.qty }, updatedAt: new Date() })
+      }
+    }
+
     if (paymentMethod === 'qr') {
-      const upi = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${(total / 100).toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderId)}`
+      const upi = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${(calculatedTotal / 100).toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderId)}`
       const paymentUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(upi)}`
       return res.json({ success: true, orderId: order._id, publicOrderId: order.orderId, paymentUrl })
     }
@@ -314,6 +363,7 @@ app.post('/orders', async (req, res) => {
       res.json({ success: true, orderId: order._id })
     }
   } catch (error) {
+    console.error('Failed to create order:', error.message)
     res.status(500).json({ error: 'Failed to create order' })
   }
 })

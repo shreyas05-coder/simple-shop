@@ -491,6 +491,17 @@ button {
   color: var(--gold-dark);
 }
 
+.stock-note {
+  color: var(--muted);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.stock-note.sold-out {
+  color: #9f2d2d;
+}
+
 .product-card button,
 .checkout-button {
   border: none;
@@ -1499,6 +1510,16 @@ button {
   .cart {
     padding: 20px;
   }
+}
+
+.product-card button:disabled,
+.checkout-button:disabled,
+.qty-controls button:disabled,
+.detail-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
 }
 
 .payment-methods {
