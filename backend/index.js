@@ -131,6 +131,7 @@ app.post('/auth/register', async (req, res) => {
     )
     res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name, isAdmin: false } })
   } catch (error) {
+    console.error('Registration failed:', error.message)
     res.status(500).json({ error: 'Registration failed' })
   }
 })
@@ -156,6 +157,7 @@ app.post('/auth/login', async (req, res) => {
     )
     res.json({ success: true, token, user: { id: user._id, email: user.email, name: user.name, isAdmin: user.isAdmin } })
   } catch (error) {
+    console.error('Login failed:', error.message)
     res.status(500).json({ error: 'Login failed' })
   }
 })
@@ -433,6 +435,14 @@ app.get('/admin/stats', requireAdmin, async (req, res) => {
 // ============ HEALTH CHECK ============
 app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'Ivory Thread API v2 - MongoDB + Admin' })
+})
+
+app.get('/health/db', (req, res) => {
+  res.json({
+    mongoReadyState: mongoose.connection.readyState,
+    mongoStatus: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState] || 'unknown',
+    database: mongoose.connection.name || null
+  })
 })
 
 app.listen(PORT, () => {
