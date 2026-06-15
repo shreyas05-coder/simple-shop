@@ -24,6 +24,7 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false)
   const [productDetail, setProductDetail] = useState(null)
   const [page, setPage] = useState('home')
+  const [cartOpen, setCartOpen] = useState(false)
   const [checkoutMode, setCheckoutMode] = useState(false)
   const [customer, setCustomer] = useState({ name: '', email: '', phone: '', street: '', city: '', state: '', zip: '', country: 'India', card: '', expiry: '', cvc: '' })
   const [paymentMethod, setPaymentMethod] = useState('qr')
@@ -122,6 +123,7 @@ export default function App() {
 
   function goTo(nextPage) {
     setPage(nextPage)
+    if (nextPage === 'shop') setCartOpen(false)
     window.scrollTo(0, 0)
   }
 
@@ -144,6 +146,7 @@ export default function App() {
         )
       }
       setStatus(`${product.name} added to cart.`)
+      setCartOpen(true)
       return [...previous, { ...product, id: productId, stock, qty: 1 }]
     })
   }
@@ -164,6 +167,11 @@ export default function App() {
 
   function removeFromCart(id) {
     setCart((previous) => previous.filter((item) => item.id !== id))
+  }
+
+  function closeCart() {
+    setCartOpen(false)
+    setCheckoutMode(false)
   }
 
   function handleInputChange(event) {
@@ -339,30 +347,47 @@ export default function App() {
           <button type="button" className="nav-button" onClick={() => { setShowAuth(true); setAuthMode(authMode || 'login') }}>
             {user ? `${user.name || user.email}` : 'Account'}
           </button>
-          <button type="button" className="nav-button" onClick={() => goTo('shop')}>Bag ({cartCount})</button>
+          <button type="button" className="nav-button cart-trigger" onClick={() => setCartOpen(true)}>Bag ({cartCount})</button>
         </nav>
       </header>
 
-      <section className="hero">
-        <div className="hero-copy-block">
-          <p className="hero-eyebrow">Crafting excellence</p>
-          <h1>
-            Crafting excellence
-            <br />
-            <span>through every thread.</span>
-          </h1>
-          <p className="hero-copy-text">
-            Thirty years of textile manufacturing. Premium fabrics and luxury fashion, delivered to ateliers,
-            designers, and discerning homes worldwide.
-          </p>
-          <div className="hero-buttons">
-            <button type="button" className="primary-button" onClick={() => goTo('shop')}>Shop fabrics</button>
-            <button type="button" className="secondary-button" onClick={() => goTo('about')}>Explore heritage</button>
-          </div>
-        </div>
-      </section>
+      {status && <div className="status-message global-status">{status}</div>}
 
       <div className="page-transition">
+        {page === 'home' && (
+          <>
+            <section className="hero">
+              <div className="hero-copy-block">
+                <p className="hero-eyebrow">Ivory Thread atelier</p>
+                <h1>
+                  Premium fabrics for refined spaces.
+                </h1>
+                <p className="hero-copy-text">
+                  Curated textiles, honest stock, QR checkout, and a quiet luxury shopping experience for designers, boutiques, and homes.
+                </p>
+                <div className="hero-buttons">
+                  <button type="button" className="primary-button" onClick={() => goTo('shop')}>Shop fabrics</button>
+                  <button type="button" className="secondary-button" onClick={() => goTo('about')}>Our story</button>
+                </div>
+              </div>
+            </section>
+            <section className="feature-strip">
+              <div>
+                <strong>Verified stock</strong>
+                <span>Products stop at available quantity.</span>
+              </div>
+              <div>
+                <strong>QR checkout</strong>
+                <span>Scan to pay and confirm your order.</span>
+              </div>
+              <div>
+                <strong>Admin managed</strong>
+                <span>Fresh products can be added anytime.</span>
+              </div>
+            </section>
+          </>
+        )}
+
         {page === 'about' && (
           <section className="static about page-content">
             <h1>About Ivory Thread</h1>
@@ -397,18 +422,16 @@ export default function App() {
         )}
 
         {page === 'shop' && (
-          <section className="shop-note page-content">
-            <p className="browse-note">Browse our curated collection of premium fabrics and home goods below. Hover over items for details.</p>
-          </section>
-        )}
-
-        {page === 'home' && (
-          <section className="shop-note page-content">
-            <p className="browse-note">Explore our signature collection of premium textiles and luxury home goods.</p>
+          <section className="shop-hero">
+            <p className="hero-eyebrow">Shop</p>
+            <h1>Choose fabric with confidence.</h1>
+            <p>Filter by material, color, and price. Your cart opens only when you need it, so browsing stays focused.</p>
           </section>
         )}
       </div>
 
+      {page === 'shop' && (
+      <>
       <div className="search-bar">
         <input
           value={search}
@@ -442,7 +465,7 @@ export default function App() {
             <input value={maxPriceFilter} onChange={(e) => setMaxPriceFilter(e.target.value)} placeholder="Max Rs" style={{ width: 80 }} />
       </div>
 
-      <div className="layout">
+      <div className="layout shop-layout">
         <section className="catalog">
           <div className="section-header">
             <div>
@@ -477,14 +500,19 @@ export default function App() {
             ))}
           </div>
         </section>
+      </div>
+      </>
+      )}
 
-        <aside className="cart">
+      {cartOpen && (
+        <div className="cart-overlay" role="dialog" aria-modal="true" aria-label="Shopping cart">
+        <aside className="cart cart-drawer">
           <div className="section-header">
             <div>
               <h2>Cart</h2>
               <p>{cart.length ? 'Ready for checkout.' : 'Your cart is empty.'}</p>
             </div>
-            <span className="badge cart-badge">{cartCount}</span>
+            <button type="button" className="drawer-close" onClick={closeCart}>Close</button>
           </div>
 
           <div className="cart-list">
@@ -714,10 +742,9 @@ export default function App() {
               </div>
             </div>
           )}
-
-          {status && <div className="status-message">{status}</div>}
         </aside>
-      </div>
+        </div>
+      )}
     </div>
   )
 }
