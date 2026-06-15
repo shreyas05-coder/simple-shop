@@ -270,8 +270,12 @@ app.delete('/admin/products/:id', requireAdmin, async (req, res) => {
 // ============ ORDER ENDPOINTS ============
 app.post('/orders', async (req, res) => {
   const { items, total, customer, paymentMethod, shippingAddress } = req.body
+  const allowedPaymentMethods = ['qr', 'card', 'stripe']
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Items required' })
+  }
+  if (!allowedPaymentMethods.includes(paymentMethod)) {
+    return res.status(400).json({ error: 'Choose a valid payment method' })
   }
   if (!customer?.name || !customer?.email || !customer?.phone || !shippingAddress?.street || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zip) {
     return res.status(400).json({ error: 'Complete customer and shipping details are required' })
@@ -293,8 +297,9 @@ app.post('/orders', async (req, res) => {
         if (!product) {
           return res.status(404).json({ error: `${item.name || 'Product'} is no longer available` })
         }
-        if (product.stock < qty) {
-          return res.status(400).json({ error: `Only ${product.stock} unit(s) of ${product.name} are available` })
+        const availableStock = Number(product.stock) || 0
+        if (availableStock < qty) {
+          return res.status(400).json({ error: `Only ${availableStock} unit(s) of ${product.name} are available` })
         }
 
         normalizedItems.push({
@@ -312,8 +317,9 @@ app.post('/orders', async (req, res) => {
         if (!product || !Number.isInteger(qty) || qty < 1) {
           return res.status(400).json({ error: 'Invalid cart item' })
         }
-        if (product.stock < qty) {
-          return res.status(400).json({ error: `Only ${product.stock} unit(s) of ${product.name} are available` })
+        const availableStock = Number(product.stock) || 0
+        if (availableStock < qty) {
+          return res.status(400).json({ error: `Only ${availableStock} unit(s) of ${product.name} are available` })
         }
         normalizedItems.push({ id: product._id, name: product.name, price: product.price, qty })
         calculatedTotal += product.price * qty

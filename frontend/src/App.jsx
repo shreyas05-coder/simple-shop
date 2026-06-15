@@ -33,6 +33,7 @@ export default function App() {
   const [orderEmail, setOrderEmail] = useState('')
   const [orderHistory, setOrderHistory] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setDebouncedSearch(search.trim()), 350)
@@ -234,6 +235,7 @@ export default function App() {
 
   async function submitOrder(event) {
     event.preventDefault()
+    if (isSubmittingOrder) return
     if (qrPaymentUrl) {
       setStatus('QR payment is already created for this order. Scan it or refresh checkout to start again.')
       return
@@ -253,6 +255,7 @@ export default function App() {
         return
       }
     }
+    setIsSubmittingOrder(true)
     setStatus('Submitting your order...')
     const items = cart.map(({ id, name, price, qty }) => ({ id, name, price, qty }))
     const shippingAddress = {
@@ -279,6 +282,9 @@ export default function App() {
         setQrPaymentUrl(data.paymentUrl)
         setCurrentOrderId(data.orderId)
         setStatus('Scan the QR code with your payment app to complete the order.')
+        window.setTimeout(() => {
+          document.querySelector('.qr-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }, 50)
         // Keep cart until user confirms payment
         return
       }
@@ -291,6 +297,8 @@ export default function App() {
       setStatus(`Order confirmed! Order #${data.orderId} has been received.`)
     } catch (error) {
       setStatus(error.message || 'Checkout failed. Please try again.')
+    } finally {
+      setIsSubmittingOrder(false)
     }
   }
 
@@ -515,6 +523,8 @@ export default function App() {
             <button type="button" className="drawer-close" onClick={closeCart}>Close</button>
           </div>
 
+          {status && <div className="status-message drawer-status">{status}</div>}
+
           <div className="cart-list">
             {cart.length === 0 ? (
               <div className="empty-state">Collect your favorite pieces and complete your space.</div>
@@ -619,14 +629,28 @@ export default function App() {
                 </>
               )}
 
-              <button type="submit" className="checkout-button">
-                {paymentMethod === 'card' ? `Record card order for ${formatMoney(cartTotal)}` : `Create QR payment for ${formatMoney(cartTotal)}`}
+              <button type="submit" className="checkout-button" disabled={isSubmittingOrder || !!qrPaymentUrl}>
+                {isSubmittingOrder
+                  ? 'Creating payment...'
+                  : paymentMethod === 'card'
+                    ? `Record card order for ${formatMoney(cartTotal)}`
+                    : `Create QR payment for ${formatMoney(cartTotal)}`}
               </button>
 
               {qrPaymentUrl && currentOrderId && (
                 <div className="qr-panel">
                   <h4>Scan to pay</h4>
-                  <img src={qrPaymentUrl} alt="QR code to pay" style={{ width: 220, height: 220 }} />
+                  <img
+                    src={qrPaymentUrl}
+                    alt="QR code to pay"
+                    style={{ width: 220, height: 220 }}
+                    onError={(event) => {
+                      const encoded = qrPaymentUrl.split('data=')[1]
+                      if (encoded) {
+                        event.currentTarget.src = `https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=${encoded}`
+                      }
+                    }}
+                  />
                   <p>Order #{currentOrderId} - Scan this QR code with your payment app to complete payment.</p>
                   <button
                     type="button"
