@@ -1694,3 +1694,283 @@ td {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 720px) {
+  body {
+    padding: 0;
+    background: #18120e;
+  }
+
+  .container {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .top-bar {
+    min-height: auto;
+    margin: 0 0 10px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .brand-logo {
+    order: -1;
+    justify-content: center;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links,
+  .nav-actions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    gap: 8px;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .nav-links::-webkit-scrollbar,
+  .nav-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-links a,
+  .nav-actions .nav-button {
+    min-height: 38px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: rgba(255, 250, 243, 0.72);
+    white-space: nowrap;
+    font-size: 0.82rem;
+  }
+
+  .hero {
+    min-height: 430px;
+    margin-bottom: 18px;
+    padding: 34px 20px;
+    border-radius: 14px;
+    background-position: center;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+  }
+
+  .hero-copy-block {
+    max-width: 100%;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 12px;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+  }
+
+  .hero h1 {
+    font-size: 2.35rem;
+    line-height: 1.06;
+  }
+
+  .hero-copy-text {
+    margin-top: 18px;
+    font-size: 0.96rem;
+    line-height: 1.65;
+  }
+
+  .hero-buttons {
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .checkout-button {
+    min-height: 46px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  .page-content,
+  .static,
+  .shop-note,
+  .cart {
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .page-content h1 {
+    font-size: 1.75rem;
+    margin-bottom: 18px;
+  }
+
+  .layout {
+    gap: 18px;
+  }
+
+  .search-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .search-bar input:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .search-bar input,
+  .search-bar select,
+  .checkout-form input,
+  .history-search input {
+    min-width: 0;
+    min-height: 44px;
+    border-radius: 12px;
+    padding: 11px 12px;
+    font-size: 16px;
+  }
+
+  .section-header {
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .section-header h2,
+  .cart h2 {
+    font-size: 1.45rem;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .product-card {
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  }
+
+  .product-card:hover,
+  .product-card:hover img,
+  .cart-item:hover {
+    transform: none;
+  }
+
+  .product-card img {
+    height: 220px;
+  }
+
+  .product-card-body {
+    padding: 18px;
+  }
+
+  .product-meta,
+  .cart-footer,
+  .cart-actions,
+  .detail-actions,
+  .history-search,
+  .payment-methods {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .checkout-form {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .card-row,
+  .detail-modal .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .modal-inner {
+    max-height: 92vh;
+    border-radius: 16px;
+    overflow-y: auto;
+  }
+
+  .detail-modal .detail-grid {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .auth-card {
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .admin-dashboard {
+    padding: 10px;
+  }
+
+  .admin-header,
+  .admin-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 14px;
+  }
+
+  .admin-tabs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .admin-overview,
+  .admin-products,
+  .admin-orders {
+    padding: 16px;
+    border-radius: 14px;
+    overflow-x: auto;
+  }
+
+  .product-actions,
+  .form-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  table {
+    min-width: 680px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (max-width: 720px) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

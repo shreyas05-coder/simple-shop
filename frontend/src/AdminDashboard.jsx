@@ -337,7 +337,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     <img src={product.image} alt={product.name} className="product-thumb" />
                     <div className="product-details">
                       <h4>{product.name}</h4>
-                      <p className="category">{product.category} • {product.color} • {product.material}</p>
+                      <p className="category">{product.category} - {product.color} - {product.material}</p>
                       <p className="price">{formatMoney(product.price)}</p>
                       <p className="stock">Stock: {product.stock}</p>
                     </div>

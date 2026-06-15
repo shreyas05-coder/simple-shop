@@ -31,10 +31,18 @@ export default function App() {
   const [currentOrderId, setCurrentOrderId] = useState(null)
   const [orderEmail, setOrderEmail] = useState('')
   const [orderHistory, setOrderHistory] = useState([])
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
   useEffect(() => {
-    fetchProducts()
-  }, [search, category, colorFilter, materialFilter, minPriceFilter, maxPriceFilter])
+    const timeoutId = window.setTimeout(() => setDebouncedSearch(search.trim()), 350)
+    return () => window.clearTimeout(timeoutId)
+  }, [search])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchProducts(controller.signal)
+    return () => controller.abort()
+  }, [debouncedSearch, category, colorFilter, materialFilter, minPriceFilter, maxPriceFilter])
 
   useEffect(() => {
     // load token from localStorage
@@ -70,9 +78,9 @@ export default function App() {
     loadCategories()
   }, [])
 
-  async function fetchProducts() {
+  async function fetchProducts(signal) {
     const params = new URLSearchParams()
-    if (search) params.set('search', search)
+    if (debouncedSearch) params.set('search', debouncedSearch)
     if (category && category !== 'All') params.set('category', category)
     if (colorFilter) params.set('color', colorFilter)
     if (materialFilter) params.set('material', materialFilter)
@@ -80,13 +88,14 @@ export default function App() {
     if (maxPriceFilter) params.set('maxPrice', String(Number(maxPriceFilter) || ''))
     const url = `${API_URL}/products?${params.toString()}`
     try {
-      const response = await fetch(url)
+      const response = await fetch(url, { signal })
       const data = await response.json()
       if (!response.ok || !Array.isArray(data)) {
         throw new Error(data.error || 'Invalid product response')
       }
       setProducts(data)
     } catch (error) {
+      if (error.name === 'AbortError') return
       setProducts([])
     }
   }
@@ -422,8 +431,8 @@ export default function App() {
           </div>
           <div className="products-grid">
             {filteredProducts.map((product) => (
-              <article key={product.id} className="product-card">
-                <img src={product.image} alt={product.name} />
+              <article key={product._id || product.id} className="product-card">
+                <img src={product.image} alt={product.name} loading="lazy" decoding="async" />
                 <div className="product-card-body">
                   <div>
                     <span className="product-tag">{product.category}</span>
@@ -562,7 +571,7 @@ export default function App() {
                 <div className="qr-panel">
                   <h4>Scan to pay</h4>
                   <img src={qrPaymentUrl} alt="QR code to pay" style={{ width: 220, height: 220 }} />
-                  <p>Order #{currentOrderId} — Scan this QR code with your payment app to complete payment.</p>
+                  <p>Order #{currentOrderId} - Scan this QR code with your payment app to complete payment.</p>
                   <button
                     type="button"
                     className="checkout-button"
@@ -585,7 +594,7 @@ export default function App() {
                       }
                     }}
                   >
-                    I have paid — mark as paid
+                    I have paid - mark as paid
                   </button>
                 </div>
               )}
@@ -629,7 +638,7 @@ export default function App() {
                   </div>
                   <div className="detail-info">
                     <h2>{productDetail.name}</h2>
-                    <p className="muted">{productDetail.category} • {productDetail.color} • {productDetail.material}</p>
+                    <p className="muted">{productDetail.category} - {productDetail.color} - {productDetail.material}</p>
                     <p>{productDetail.description}</p>
                     <div className="detail-actions">
                       <strong className="price">{formatMoney(productDetail.price)}</strong>
