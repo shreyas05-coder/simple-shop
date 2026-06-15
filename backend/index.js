@@ -271,6 +271,10 @@ app.delete('/admin/products/:id', requireAdmin, async (req, res) => {
 app.post('/orders', async (req, res) => {
   const { items, total, customer, paymentMethod, shippingAddress } = req.body
   const allowedPaymentMethods = ['qr', 'card', 'stripe']
+  const digits = (value) => String(value || '').replace(/\D/g, '')
+  const email = String(customer?.email || '').trim()
+  const phone = digits(customer?.phone)
+  const zip = digits(shippingAddress?.zip)
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Items required' })
   }
@@ -279,6 +283,15 @@ app.post('/orders', async (req, res) => {
   }
   if (!customer?.name || !customer?.email || !customer?.phone || !shippingAddress?.street || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.zip) {
     return res.status(400).json({ error: 'Complete customer and shipping details are required' })
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address' })
+  }
+  if (phone.length < 10) {
+    return res.status(400).json({ error: 'Enter a valid phone number' })
+  }
+  if (!/^\d{6}$/.test(zip)) {
+    return res.status(400).json({ error: 'Enter a valid 6-digit PIN code' })
   }
   try {
     const orderId = 'ORD-' + Date.now()

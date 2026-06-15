@@ -34,6 +34,7 @@ export default function App() {
   const [orderHistory, setOrderHistory] = useState([])
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
+  const [checkoutErrors, setCheckoutErrors] = useState({})
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => setDebouncedSearch(search.trim()), 350)
@@ -178,6 +179,55 @@ export default function App() {
   function handleInputChange(event) {
     const { name, value } = event.target
     setCustomer((current) => ({ ...current, [name]: value }))
+    setCheckoutErrors((current) => ({ ...current, [name]: '' }))
+  }
+
+  function fieldError(name) {
+    return checkoutErrors[name] ? <span className="field-error">{checkoutErrors[name]}</span> : null
+  }
+
+  function validateCheckout() {
+    const nextErrors = {}
+    const values = Object.fromEntries(
+      Object.entries(customer).map(([key, value]) => [key, String(value || '').trim()])
+    )
+    const digits = (value) => value.replace(/\D/g, '')
+
+    if (!values.name) nextErrors.name = 'Enter the customer name.'
+    if (!values.email) {
+      nextErrors.email = 'Enter an email address.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      nextErrors.email = 'Enter a valid email address.'
+    }
+    if (!values.phone) {
+      nextErrors.phone = 'Enter a WhatsApp or phone number.'
+    } else if (digits(values.phone).length < 10) {
+      nextErrors.phone = 'Enter at least 10 phone digits.'
+    }
+    if (!values.street) nextErrors.street = 'Enter the full shipping address.'
+    if (!values.city) nextErrors.city = 'Enter the city.'
+    if (!values.state) nextErrors.state = 'Enter the state.'
+    if (!values.zip) {
+      nextErrors.zip = 'Enter the PIN code.'
+    } else if (!/^\d{6}$/.test(digits(values.zip))) {
+      nextErrors.zip = 'Enter a valid 6-digit PIN code.'
+    }
+    if (!values.country) nextErrors.country = 'Enter the country.'
+
+    if (paymentMethod === 'card') {
+      if (!values.card) nextErrors.card = 'Enter card number.'
+      if (!values.expiry) nextErrors.expiry = 'Enter expiry.'
+      if (!values.cvc) nextErrors.cvc = 'Enter CVC.'
+    }
+
+    setCheckoutErrors(nextErrors)
+    const firstErrorField = Object.keys(nextErrors)[0]
+    if (firstErrorField) {
+      setStatus(nextErrors[firstErrorField])
+      window.setTimeout(() => document.querySelector(`[name="${firstErrorField}"]`)?.focus(), 0)
+      return false
+    }
+    return true
   }
 
   function handleAuthChange(e) {
@@ -240,21 +290,11 @@ export default function App() {
       setStatus('QR payment is already created for this order. Scan it or refresh checkout to start again.')
       return
     }
-    if (!customer.name || !customer.email || !customer.phone || !customer.street || !customer.city || !customer.state || !customer.zip) {
-      setStatus('Please complete your contact and shipping details.')
-      return
-    }
     if (cart.length === 0) {
       setStatus('Add something to your cart before checkout.')
       return
     }
-    // If paymentMethod is card, require card fields (this demo does not process real cards)
-    if (paymentMethod === 'card') {
-      if (!customer.card || !customer.expiry || !customer.cvc) {
-        setStatus('Please complete all card fields for card payment.')
-        return
-      }
-    }
+    if (!validateCheckout()) return
     setIsSubmittingOrder(true)
     setStatus('Submitting your order...')
     const items = cart.map(({ id, name, price, qty }) => ({ id, name, price, qty }))
@@ -562,42 +602,50 @@ export default function App() {
           </div>
 
           {checkoutMode && (
-            <form className="checkout-form" onSubmit={submitOrder}>
+            <form className="checkout-form" onSubmit={submitOrder} noValidate>
               <h3>Secure checkout</h3>
               <label>
                 Name
-                <input name="name" value={customer.name} onChange={handleInputChange} placeholder="Full name" />
+                <input name="name" value={customer.name} onChange={handleInputChange} placeholder="Full name" required aria-invalid={!!checkoutErrors.name} />
+                {fieldError('name')}
               </label>
               <label>
                 Email
-                <input name="email" value={customer.email} onChange={handleInputChange} placeholder="you@example.com" />
+                <input type="email" name="email" value={customer.email} onChange={handleInputChange} placeholder="you@example.com" required aria-invalid={!!checkoutErrors.email} />
+                {fieldError('email')}
               </label>
               <label>
                 Phone / WhatsApp
-                <input name="phone" value={customer.phone} onChange={handleInputChange} placeholder="+91 98765 43210" />
+                <input name="phone" value={customer.phone} onChange={handleInputChange} placeholder="+91 98765 43210" required aria-invalid={!!checkoutErrors.phone} />
+                {fieldError('phone')}
               </label>
               <label>
                 Shipping address
-                <input name="street" value={customer.street} onChange={handleInputChange} placeholder="House, street, area" />
+                <input name="street" value={customer.street} onChange={handleInputChange} placeholder="House, street, area" required aria-invalid={!!checkoutErrors.street} />
+                {fieldError('street')}
               </label>
               <div className="card-row">
                 <label>
                   City
-                  <input name="city" value={customer.city} onChange={handleInputChange} placeholder="City" />
+                  <input name="city" value={customer.city} onChange={handleInputChange} placeholder="City" required aria-invalid={!!checkoutErrors.city} />
+                  {fieldError('city')}
                 </label>
                 <label>
                   State
-                  <input name="state" value={customer.state} onChange={handleInputChange} placeholder="State" />
+                  <input name="state" value={customer.state} onChange={handleInputChange} placeholder="State" required aria-invalid={!!checkoutErrors.state} />
+                  {fieldError('state')}
                 </label>
               </div>
               <div className="card-row">
                 <label>
                   PIN code
-                  <input name="zip" value={customer.zip} onChange={handleInputChange} placeholder="110001" />
+                  <input name="zip" value={customer.zip} onChange={handleInputChange} placeholder="110001" inputMode="numeric" required aria-invalid={!!checkoutErrors.zip} />
+                  {fieldError('zip')}
                 </label>
                 <label>
                   Country
-                  <input name="country" value={customer.country} onChange={handleInputChange} placeholder="India" />
+                  <input name="country" value={customer.country} onChange={handleInputChange} placeholder="India" required aria-invalid={!!checkoutErrors.country} />
+                  {fieldError('country')}
                 </label>
               </div>
 
@@ -614,16 +662,19 @@ export default function App() {
                 <>
                   <label>
                     Card number
-                    <input name="card" value={customer.card} onChange={handleInputChange} placeholder="4242 4242 4242 4242" />
+                    <input name="card" value={customer.card} onChange={handleInputChange} placeholder="4242 4242 4242 4242" aria-invalid={!!checkoutErrors.card} />
+                    {fieldError('card')}
                   </label>
                   <div className="card-row">
                     <label>
                       Expiry
-                      <input name="expiry" value={customer.expiry} onChange={handleInputChange} placeholder="MM/YY" />
+                      <input name="expiry" value={customer.expiry} onChange={handleInputChange} placeholder="MM/YY" aria-invalid={!!checkoutErrors.expiry} />
+                      {fieldError('expiry')}
                     </label>
                     <label>
                       CVC
-                      <input name="cvc" value={customer.cvc} onChange={handleInputChange} placeholder="123" />
+                      <input name="cvc" value={customer.cvc} onChange={handleInputChange} placeholder="123" aria-invalid={!!checkoutErrors.cvc} />
+                      {fieldError('cvc')}
                     </label>
                   </div>
                 </>
