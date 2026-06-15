@@ -47,6 +47,29 @@ Render can deploy this monorepo backend quickly using `render.yaml`.
 - The backend listens on `process.env.PORT`, so Render will set the correct port automatically.
 - `render.yaml` is included in this repo to simplify deployment.
 
+### Backend environment variables
+Set these environment variables in your hosting provider for production:
+
+- `VITE_API_URL` (frontend): the deployed backend URL, added in Netlify/Vercel UI
+- `SECRET` (backend): a long random secret for signing auth tokens
+- `FRONTEND_URL` (backend CORS): the frontend origin allowed to access the API (e.g. `https://your-frontend.netlify.app`)
+
+Install new backend dependencies before deploy: `helmet`, `morgan`, and `dotenv`.
+The `backend/package.json` has been updated; `npm install` will fetch them.
+
+### Recommended deployment environment variables
+For production, configure these secrets in your hosting dashboard:
+
+- `VITE_API_URL` = `https://your-backend.example.com`
+- `SECRET` = `your-long-random-secret`
+- `FRONTEND_URL` = `https://your-frontend.example.com`
+
+### Netlify
+If you use Netlify, set `VITE_API_URL` in the Netlify UI for the frontend site.
+
+### Render
+If you use Render, set `SECRET` and `FRONTEND_URL` in the Render dashboard for the backend service.
+
 ### Alternative: Railway
 If you still prefer Railway, use the steps below:
 

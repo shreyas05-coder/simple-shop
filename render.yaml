@@ -1,10 +1,22 @@
 services:
   - type: web
-    name: simple-shop-backend
+    name: ivory-thread-backend
     env: node
     plan: free
-    branch: main
     root: backend
     buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: UPI_ID
+        sync: false
+      - key: UPI_NAME
+        value: Ivory Thread
