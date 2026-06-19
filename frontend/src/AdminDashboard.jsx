@@ -13,6 +13,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
     description: '',
     category: '',
     price: '',
+    compareAtPrice: '',
     color: '',
     material: '',
     image: '',
@@ -90,6 +91,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
           description: '',
           category: '',
           price: '',
+          compareAtPrice: '',
           color: '',
           material: '',
           image: '',
@@ -114,7 +116,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ ...editingProduct, price: editingProduct.price / 100 })
+        body: JSON.stringify({
+          ...editingProduct,
+          price: editingProduct.price / 100,
+          compareAtPrice: editingProduct.compareAtPrice ? editingProduct.compareAtPrice / 100 : null
+        })
       })
       const data = await response.json()
       if (data.success) {
@@ -277,6 +283,17 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     : setNewProduct({ ...newProduct, price: e.target.value })
                   }
                   required
+                />
+                <input
+                  type="number"
+                  placeholder="MRP / Compare-at price (Rs, optional)"
+                  value={editingProduct
+                    ? (editingProduct.compareAtPrice ? editingProduct.compareAtPrice / 100 : '')
+                    : newProduct.compareAtPrice}
+                  onChange={(e) => editingProduct
+                    ? setEditingProduct({ ...editingProduct, compareAtPrice: e.target.value ? Number(e.target.value) * 100 : null })
+                    : setNewProduct({ ...newProduct, compareAtPrice: e.target.value })
+                  }
                 />
                 <input
                   type="text"

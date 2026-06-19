@@ -221,7 +221,7 @@ app.get('/products/:id', async (req, res) => {
 
 // ADMIN: Create Product
 app.post('/admin/products', requireAdmin, async (req, res) => {
-  const { name, description, category, price, color, material, image, stock } = req.body
+  const { name, description, category, price, compareAtPrice, color, material, image, stock } = req.body
   if (!name || !description || !category || price === undefined || !color || !material || !image) {
     return res.status(400).json({ error: 'All fields required' })
   }
@@ -231,6 +231,7 @@ app.post('/admin/products', requireAdmin, async (req, res) => {
       description,
       category,
       price: Number(price) * 100,
+      compareAtPrice: compareAtPrice ? Number(compareAtPrice) * 100 : null,
       color,
       material,
       image,
@@ -248,6 +249,11 @@ app.put('/admin/products/:id', requireAdmin, async (req, res) => {
   try {
     const updates = { ...req.body, updatedAt: new Date() }
     if (updates.price) updates.price = Number(updates.price) * 100
+    if (updates.compareAtPrice !== undefined) {
+      updates.compareAtPrice = updates.compareAtPrice
+        ? Number(updates.compareAtPrice) * 100
+        : null
+    }
     const product = await Product.findByIdAndUpdate(req.params.id, updates, { new: true })
     if (!product) return res.status(404).json({ error: 'Product not found' })
     res.json({ success: true, product })
