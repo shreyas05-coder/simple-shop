@@ -114,6 +114,7 @@ export default function App() {
   )
 
   const categories = allCategories
+  const visibleCategories = categories.filter((value) => value !== 'All').slice(0, 8)
 
   const filteredProducts = useMemo(
     () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
@@ -371,7 +372,7 @@ export default function App() {
   return (
     <div className="container">
       <div className="top-bar">
-        Complimentary fabric swatches on orders above Rs 5,000 - worldwide shipping
+        Wholesale fabrics | Fast dispatch | Secure QR checkout | WhatsApp support
       </div>
 
       <header className="site-header">
@@ -385,8 +386,8 @@ export default function App() {
 
         <div className="brand-logo">
           <span>Ivory</span>
-          <span>·</span>
           <span>Thread</span>
+          <small>fabric studio</small>
         </div>
 
         <nav className="nav-actions">
@@ -406,12 +407,12 @@ export default function App() {
           <>
             <section className="hero">
               <div className="hero-copy-block">
-                <p className="hero-eyebrow">Ivory Thread atelier</p>
+                <p className="hero-eyebrow">Fabric marketplace</p>
                 <h1>
-                  Premium fabrics for refined spaces.
+                  Fabrics for designers, boutiques, and everyday makers.
                 </h1>
                 <p className="hero-copy-text">
-                  Curated textiles, honest stock, QR checkout, and a quiet luxury shopping experience for designers, boutiques, and homes.
+                  Browse cottons, linens, decor textiles, and curated soft goods with live stock, fast filtering, and QR checkout.
                 </p>
                 <div className="hero-buttons">
                   <button type="button" className="primary-button" onClick={() => goTo('shop')}>Shop fabrics</button>
@@ -421,16 +422,16 @@ export default function App() {
             </section>
             <section className="feature-strip">
               <div>
-                <strong>Verified stock</strong>
-                <span>Products stop at available quantity.</span>
+                <strong>Live stock</strong>
+                <span>Quantity limits are enforced before checkout.</span>
               </div>
               <div>
-                <strong>QR checkout</strong>
-                <span>Scan to pay and confirm your order.</span>
+                <strong>Fabric-first filters</strong>
+                <span>Search by material, color, category, and budget.</span>
               </div>
               <div>
-                <strong>Admin managed</strong>
-                <span>Fresh products can be added anytime.</span>
+                <strong>Repeat buyer ready</strong>
+                <span>Quick cart, order history, and account access.</span>
               </div>
             </section>
           </>
@@ -471,9 +472,24 @@ export default function App() {
 
         {page === 'shop' && (
           <section className="shop-hero">
-            <p className="hero-eyebrow">Shop</p>
-            <h1>Choose fabric with confidence.</h1>
-            <p>Filter by material, color, and price. Your cart opens only when you need it, so browsing stays focused.</p>
+            <p className="hero-eyebrow">Shop fabrics</p>
+            <h1>Find the right fabric faster.</h1>
+            <p>Use category chips and filters to narrow the catalog. Add to bag opens a focused checkout drawer.</p>
+            {visibleCategories.length > 0 && (
+              <div className="category-chips" aria-label="Popular categories">
+                <button type="button" className={category === 'All' ? 'active' : ''} onClick={() => setCategory('All')}>All</button>
+                {visibleCategories.map((value) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className={category === value ? 'active' : ''}
+                    onClick={() => setCategory(value)}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
         )}
       </div>
@@ -481,11 +497,14 @@ export default function App() {
       {page === 'shop' && (
       <>
       <div className="search-bar">
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search the Ivory Thread collection"
-        />
+        <label className="filter-search">
+          <span>Search fabrics</span>
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search cotton, linen, ivory, decor..."
+          />
+        </label>
         <select value={category} onChange={(event) => setCategory(event.target.value)}>
           {categories.map((value) => (
             <option key={value} value={value}>
@@ -512,13 +531,18 @@ export default function App() {
             <input value={minPriceFilter} onChange={(e) => setMinPriceFilter(e.target.value)} placeholder="Min Rs" style={{ width: 80 }} />
             <input value={maxPriceFilter} onChange={(e) => setMaxPriceFilter(e.target.value)} placeholder="Max Rs" style={{ width: 80 }} />
       </div>
+      <div className="shop-utility-strip">
+        <span>Ready stock only</span>
+        <span>Price shown in INR</span>
+        <span>Admin-managed catalog</span>
+      </div>
 
       <div className="layout shop-layout">
         <section className="catalog">
           <div className="section-header">
             <div>
               <h2>Signature pieces</h2>
-              <p>Handpicked products designed to feel luxurious and calm.</p>
+              <p>Browse fabric-friendly listings with stock and material details.</p>
             </div>
             <span className="badge">{filteredProducts.length} items</span>
           </div>
